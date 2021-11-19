@@ -3,8 +3,9 @@ import webbrowser
 import time
 import os
 
-from secret import *
 import dummy
+
+# ADMIN_KEY = ''
 
 server = "https://mu-in.herokuapp.com/payment"
 kakao = "https://kapi.kakao.com/v1/payment/ready"
