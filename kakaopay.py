@@ -50,9 +50,10 @@ def payment(data,quantity,total):
     webbrowser.open(url=redirect['next_redirect_pc_url'])
     
     time.sleep(10) # 10초 기다리고 닫기
-    os.system("killall -9 'Safari'") # mac에서만 작동함
+    os.system("killall -9 'Safari'") # mac
+    # os.system("taskkill /im chrome.exe /f") # window
 
-    postServer(data,total)
+    postServer(data,total) # 결제 내역 post
 
     return redirect['next_redirect_pc_url']
 
