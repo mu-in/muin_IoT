@@ -1,5 +1,6 @@
 from tkinter import *
 import tkinter.ttk as ttk
+import numpy as np
 from PIL import Image, ImageTk
 import cv2
 from functools import partial
@@ -15,6 +16,20 @@ quantity = 0
 amount = 0
 
 ''' func '''
+def init():
+    table.delete(*table.get_children())
+    for i in range(20):
+        plus[i].place(x=900,y=900)
+        minus[i].place(x=900,y=900)
+    count.config(text=str(0),font=('',25),foreground='#0076BA')
+    total.config(text=str(0),font=('',25),foreground='#0076BA')
+
+    img = Image.fromarray(255 * np.ones(shape=[1, 1, 3], dtype=np.uint8))
+    imgtk = ImageTk.PhotoImage(image=img)
+    picture.imgtk = imgtk
+    picture.configure(image=imgtk)
+    btn1.config(text='촬영')
+
 def updateList(data):
     global quantity, amount
 
@@ -77,9 +92,6 @@ def minusCount(i):
 
     updateList(data)
 
-def kakaoApi():
-    kakaopay.payment(data,quantity,amount)
-
 '''  popup '''
 def open_search():
     def destroy():
@@ -119,6 +131,11 @@ def open_search():
 def open_payment():
     def destroy():
         payment.destroy()
+
+    def kakaoApi():
+        kakaopay.payment(data,quantity,amount)
+        init()
+        destroy()
 
     payment = Toplevel(tk)
     payment.title('결제')

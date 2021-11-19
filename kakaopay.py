@@ -5,16 +5,15 @@ import os
 
 import dummy
 
-# ADMIN_KEY = ''
+ADMIN_KEY = '4f548583e4f51f456c8c69821f4b24b5'
 
 server = "https://mu-in.herokuapp.com/payment"
 kakao = "https://kapi.kakao.com/v1/payment/ready"
 
 def postServer(data,total):
-    products = data
-    for i in range(len(products)):
-        del products[i]['price']
-        del products[i]['category']
+    products = []
+    for i in range(len(data)):
+        products.append({'id':data[i]['id'],'name':data[i]['name'],'quantity':data[i]['quantity']})
     
     param = {
         'storeUuid': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaaaaaa',
