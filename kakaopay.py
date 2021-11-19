@@ -4,10 +4,28 @@ import time
 import os
 
 from secret import *
+import dummy
 
-def payment(quantity,total):
-    url = "https://kapi.kakao.com/v1/payment/ready"
+server = "https://mu-in.herokuapp.com/payment"
+kakao = "https://kapi.kakao.com/v1/payment/ready"
 
+def postServer(data,total):
+    products = data
+    for i in range(len(products)):
+        del products[i]['price']
+        del products[i]['category']
+    
+    param = {
+        'storeUuid': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaaaaaa',
+        'stocks': products,
+        'totalPrice': total,
+    }
+    
+    res = requests.post(server, headers={'Content-type':'application/json'}, params=param)
+    
+    print(res.json())
+
+def payment(data,quantity,total):
     header = {
         'Authorization':f'KakaoAK {ADMIN_KEY}',
         'Content-type':'application/x-www-form-urlencoded;charset=utf-8'
@@ -26,7 +44,7 @@ def payment(quantity,total):
         'fail_url':'http://127.0.0.1:5000'
     }
 
-    res = requests.post(url, headers=header, params=param)
+    res = requests.post(kakao, headers=header, params=param)
     redirect = res.json()
 
     webbrowser.open(url=redirect['next_redirect_pc_url'])
@@ -34,8 +52,10 @@ def payment(quantity,total):
     time.sleep(10) # 10초 기다리고 닫기
     os.system("killall -9 'Safari'") # mac에서만 작동함
 
+    postServer(data,total)
+
     return redirect['next_redirect_pc_url']
 
 if __name__== '__main__':
-    redirect = payment(1,100)
+    redirect = payment(dummy.data,1,100)
     print(redirect)

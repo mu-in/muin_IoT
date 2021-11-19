@@ -25,16 +25,16 @@ def updateList(data):
     for i in range(0,len(data)):
         table.insert("",'end',text=f"no.{i}",
             values=(
-                data[i]['no'],
+                i+1,
                 data[i]['category'],
                 data[i]['name'],
                 data[i]['price'],
-                data[i]['count'],
-                data[i]['price']*data[i]['count']
+                data[i]['quantity'],
+                data[i]['price']*data[i]['quantity']
             )
         )  
-        total_quantity+=data[i]['count']
-        total_amount+=data[i]['price']*data[i]['count']
+        total_quantity+=data[i]['quantity']
+        total_amount+=data[i]['price']*data[i]['quantity']
 
         plus[i].place(x=400,y=30+(i*40))
         minus[i].place(x=330,y=30+(i*40))
@@ -66,19 +66,19 @@ def onCapture():
 
 def plusCount(i):
     global data
-    data[i]['count']+=1
+    data[i]['quantity']+=1
 
     updateList(data)
     
 def minusCount(i):
     global data
-    if data[i]['count']!=0:
-        data[i]['count']-=1
+    if data[i]['quantity']!=0:
+        data[i]['quantity']-=1
 
     updateList(data)
 
 def kakaoApi():
-    kakaopay.payment(quantity,amount)
+    kakaopay.payment(data,quantity,amount)
 
 '''  popup '''
 def open_search():
