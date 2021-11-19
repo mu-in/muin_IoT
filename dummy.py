@@ -1,0 +1,51 @@
+data = [ # dummy data
+    {
+        'no':1,
+        'category':'아이스크림',
+        'name':'빠삐코',
+        'price':800,
+        'count':3,
+    },
+    {
+        'no':2,
+        'category':'아이스크림',
+        'name':'탱크보이',
+        'price':700,
+        'count':2,
+    },
+    {
+        'no':3,
+        'category':'과자',
+        'name':'새우깡',
+        'price':1200,
+        'count':1,
+    },
+    {
+        'no':4,
+        'category':'라면',
+        'name':'틈새라면',
+        'price':1000,
+        'count':8,
+    },
+    {
+        'no':5,
+        'category':'아이스크림',
+        'name':'스크류바',
+        'price':600,
+        'count':2,
+    },
+    {
+        'no':6,
+        'category':'아이스크림',
+        'name':'젤루조아 청포도맛',
+        'price':700,
+        'count':5,
+    },
+    {
+        'no':7,
+        'category':'아이스크림',
+        'name':'젤루조아 오렌지맛',
+        'price':700,
+        'count':2,
+    },
+]

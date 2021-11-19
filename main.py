@@ -1,74 +1,27 @@
 from tkinter import *
 import tkinter.ttk as ttk
-
 from PIL import Image, ImageTk
 import cv2
 
 from functools import partial
+import requests
+
+import dummy #dummy data
 
 ''' init '''
 cam = cv2.VideoCapture(0)
-data = []
 
-data = [ # dummy data
-    {
-        'no':1,
-        'category':'아이스크림',
-        'name':'빠삐코',
-        'price':800,
-        'count':3,
-    },
-    {
-        'no':2,
-        'category':'아이스크림',
-        'name':'탱크보이',
-        'price':700,
-        'count':2,
-    },
-    {
-        'no':3,
-        'category':'과자',
-        'name':'새우깡',
-        'price':1200,
-        'count':1,
-    },
-    {
-        'no':4,
-        'category':'라면',
-        'name':'틈새라면',
-        'price':1000,
-        'count':8,
-    },
-    {
-        'no':5,
-        'category':'아이스크림',
-        'name':'스크류바',
-        'price':600,
-        'count':2,
-    },
-    {
-        'no':6,
-        'category':'아이스크림',
-        'name':'젤루조아 청포도맛',
-        'price':700,
-        'count':5,
-    },
-    {
-        'no':7,
-        'category':'아이스크림',
-        'name':'젤루조아 오렌지맛',
-        'price':700,
-        'count':2,
-    },
-]
+data = []
+price = 0
 
 ''' func '''
 def updateList(data):
-    table.delete(*table.get_children())
+    global price
+
+    table.delete(*table.get_children()) # init list
 
     total_count = 0
     total_price = 0
-
     for i in range(0,len(data)):
         table.insert("",'end',text=f"no.{i}",
             values=(
@@ -88,6 +41,8 @@ def updateList(data):
     
     count.config(text=str(total_count),font=('',25),foreground='#0076BA')
     total.config(text=str(total_price),font=('',25),foreground='#0076BA')
+    
+    price = total_price
 
 def onCapture():
     global data
@@ -98,7 +53,7 @@ def onCapture():
     img = Image.fromarray(cvt_size) # 모델에 이시키 가져가면 될듯?
     imgtk = ImageTk.PhotoImage(image=img)
     
-    # data = result # 상품 리스트 결과값 여기다가 박아주면 될듯
+    data = dummy.data # 상품 리스트 결과값 여기다가 박아주면 될듯
 
     # tkinter update
     picture.imgtk = imgtk
