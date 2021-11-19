@@ -2,26 +2,26 @@ from tkinter import *
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 import cv2
-
 from functools import partial
-import requests
 
+import kakaopay
 import dummy #dummy data
 
 ''' init '''
 cam = cv2.VideoCapture(0)
 
 data = []
-price = 0
+quantity = 0
+amount = 0
 
 ''' func '''
 def updateList(data):
-    global price
+    global quantity, amount
 
     table.delete(*table.get_children()) # init list
 
-    total_count = 0
-    total_price = 0
+    total_quantity = 0
+    total_amount = 0
     for i in range(0,len(data)):
         table.insert("",'end',text=f"no.{i}",
             values=(
@@ -33,16 +33,18 @@ def updateList(data):
                 data[i]['price']*data[i]['count']
             )
         )  
-        total_count+=data[i]['count']
-        total_price+=data[i]['price']*data[i]['count']
+        total_quantity+=data[i]['count']
+        total_amount+=data[i]['price']*data[i]['count']
 
-        plus[i].place(x=420,y=20+(i*40))
-        minus[i].place(x=350,y=20+(i*40))
+        plus[i].place(x=400,y=30+(i*40))
+        minus[i].place(x=330,y=30+(i*40))
     
-    count.config(text=str(total_count),font=('',25),foreground='#0076BA')
-    total.config(text=str(total_price),font=('',25),foreground='#0076BA')
+    count.config(text=str(total_quantity),font=('',25),foreground='#0076BA')
+    total.config(text=str(total_amount),font=('',25),foreground='#0076BA')
     
-    price = total_price
+    quantity = total_quantity
+    amount = total_amount
+
 
 def onCapture():
     global data
@@ -75,6 +77,9 @@ def minusCount(i):
 
     updateList(data)
 
+def kakaoApi():
+    kakaopay.payment(quantity,amount)
+
 '''  popup '''
 def open_search():
     def destroy():
@@ -96,25 +101,64 @@ def open_search():
     sframe1.place(x=75,y=150)
 
     sframe2 = Frame(search,highlightbackground='black',highlightthickness=1)
-    sframe2.config(width=265,height=70)
+    sframe2.config(width=265,height=80)
     sframe2.place(x=75,y=450)
 
-    sbtn1 = Button(sframe2, width=28, height=4) #, command=func)
-    sbtn1.config(text='추가')
-    sbtn1.place(x=3,y=0)
+    sbtn1 = Button(sframe2, width=25, height=4, command=destroy)
+    sbtn1.config(text='취소')
+    sbtn1.place(x=0,y=0)
 
     sframe3 = Frame(search,highlightbackground='black',highlightthickness=1)
-    sframe3.config(width=265,height=70)
+    sframe3.config(width=265,height=80)
     sframe3.place(x=460,y=450)
 
-    sbtn2 = Button(sframe3, width=28, height=4, command=destroy)
-    sbtn2.config(text='창닫기')
-    sbtn2.place(x=3,y=0)
+    sbtn2 = Button(sframe3, width=25, height=4 ) # command = 
+    sbtn2.config(text='추가')
+    sbtn2.place(x=0,y=0)
 
 def open_payment():
+    def destroy():
+        payment.destroy()
+
     payment = Toplevel(tk)
     payment.title('결제')
-    payment.geometry("800x550+100+100")
+    payment.geometry("300x550+100+100")
+
+    text = Label(payment)
+    text.config(text='상품 결제',font=('',20))
+    text.place(x=110,y=50)
+
+    pframe1 = Frame(payment,highlightbackground='black',highlightthickness=1)
+    pframe1.config(width=265,height=150)
+    pframe1.place(x=17,y=130)
+
+    text = Label(payment)
+    text.config(text=f'총 {quantity} 개',font=('',15))
+    text.place(x=123,y=180)
+
+    text = Label(payment)
+    text.config(text=amount,font=('',20))
+    text.place(x=95,y=220)
+
+    text = Label(payment)
+    text.config(text='원',font=('',20))
+    text.place(x=160,y=220)
+
+    pframe2 = Frame(payment,highlightbackground='black',highlightthickness=1)
+    pframe2.config(width=265,height=80)
+    pframe2.place(x=17,y=350)
+
+    pbtn1 = Button(pframe2, width=25, height=4, command=destroy)
+    pbtn1.config(text='취소')
+    pbtn1.place(x=0,y=0)
+
+    pframe3 = Frame(payment,highlightbackground='black',highlightthickness=1)
+    pframe3.config(width=265,height=80)
+    pframe3.place(x=17,y=450)
+
+    sbtn2 = Button(pframe3, width=25, height=4, command=kakaoApi)
+    sbtn2.config(text='결제')
+    sbtn2.place(x=0,y=0)
 
 ''' tkinter '''
 tk = Tk()
@@ -171,11 +215,11 @@ table.configure(yscrollcommand=scrollbar.set)
 
 table['columns'] = ("1","2","3","4","5","6",)
 table['show']='headings'
-table.column("1",width=50,anchor='c')
-table.column("2",width=100,anchor='c')
+table.column("1",width=40,anchor='c')
+table.column("2",width=90,anchor='c')
 table.column("3",width=140,anchor='c')
 table.column("4",width=60,anchor='c')
-table.column("5",width=100,anchor='c')
+table.column("5",width=120,anchor='c')
 table.column("6",width=100,anchor='c')
 table.heading("1",text='No.')
 table.heading("2",text='대분류')
@@ -189,8 +233,8 @@ plus = []
 minus = []
 
 for i in range(20):
-    plus.append(Button(table, width=3, height=2))
-    minus.append(Button(table, width=3, height=2))
+    plus.append(Button(table, width=1, height=1))
+    minus.append(Button(table, width=1, height=1))
 
 for i in range(20):
     plus[i].config(text='+',command=partial(plusCount,i))
@@ -223,29 +267,29 @@ text.place(x=500,y=25)
 
 # capture btn
 frame5 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame5.config(width=265,height=70)
+frame5.config(width=265,height=80)
 frame5.place(x=50,y=530)
 
-btn1 = Button(frame5, width=28, height=4, command=onCapture)
+btn1 = Button(frame5, width=25, height=4, command=onCapture)
 btn1.config(text='촬영')
-btn1.place(x=3,y=0)
+btn1.place(x=0,y=0)
 
 # search btn
 frame6 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame6.config(width=265,height=70)
+frame6.config(width=265,height=80)
 frame6.place(x=350,y=530)
 
-btn2 = Button(frame6, width=28, height=4, command=open_search) #onClick
+btn2 = Button(frame6, width=25, height=4, command=open_search)
 btn2.config(text='상품 검색')
-btn2.place(x=3,y=0)
+btn2.place(x=0,y=0)
 
 # pay btn
 frame7 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame7.config(width=265,height=70)
+frame7.config(width=265,height=80)
 frame7.place(x=650,y=530)
 
-btn2 = Button(frame7, width=28, height=4, command=open_payment) #onClick
+btn2 = Button(frame7, width=25, height=4, command=open_payment)
 btn2.config(text='결제')
-btn2.place(x=3,y=0)
+btn2.place(x=0,y=0)
 
 tk.mainloop()
