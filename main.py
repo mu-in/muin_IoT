@@ -1,11 +1,15 @@
 from tkinter import *
 import tkinter.ttk as ttk
+from typing import List
 import numpy as np
+import pandas as pd
 from PIL import Image, ImageTk
 import cv2
 from functools import partial
 
 import kakaopay
+import similar
+
 import dummy #dummy data
 
 ''' init '''
@@ -14,6 +18,7 @@ cam = cv2.VideoCapture(0)
 data = []
 quantity = 0
 amount = 0
+similarList = pd.DataFrame()
 
 ''' func '''
 def init():
@@ -96,36 +101,72 @@ def minusCount(i):
 def open_search():
     def destroy():
         search.destroy()
+
+    def getEntry():
+        global similarList
+
+        similarList = pd.DataFrame()
+        similarList = similar.getSimilar(input.get())
+
+        slistbox.delete(0,END)
+        for i in range(len(similarList)):
+            slistbox.insert(i,similarList.loc[i,'name'])
+    
+    def updateData():
+        global data
+
+        try:
+            choose = slistbox.curselection()
+            i = choose[0]
+            data.append({'id':similarList.loc[i,'id'],'category':similarList.loc[i,'category'],'name':similarList.loc[i,'name'],'price':similarList.loc[i,'price'],'quantity':1})
+            updateList(data)
+            destroy()
+        except:
+            pass
+        
     search = Toplevel(tk)
     search.title('상품 검색')
-    search.geometry("800x550+100+100")
+    search.geometry("300x550+100+100")
 
     text = Label(search)
     text.config(text='상품 검색',font=('',20))
-    text.place(x=350,y=50)
+    text.place(x=110,y=50)
 
-    input = Entry(search, width=70)
-    input.place(x=80,y=100)
+    input = Entry(search, width=23)
+    input.place(x=17,y=100)
+
+    set = Button(search, width=1, height=1, command=getEntry)
+    set.config(text='검색')
+    set.place(x=250,y=100)
 
     # output
     sframe1 =  Frame(search,highlightbackground='black',highlightthickness=1)
-    sframe1.config(width=650,height=250)
-    sframe1.place(x=75,y=150)
+    sframe1.config(width=265,height=150)
+    sframe1.place(x=17,y=150)
+
+    sscrollbar = Scrollbar(sframe1)
+    sscrollbar.pack(side='right',fill='y')
+
+    slistbox = Listbox(sframe1,yscrollcommand=sscrollbar.set)
+    slistbox.config(width=28,height=10)
+    slistbox.pack(side='left')
+
+    sscrollbar['command']=slistbox.yview
 
     sframe2 = Frame(search,highlightbackground='black',highlightthickness=1)
     sframe2.config(width=265,height=80)
-    sframe2.place(x=75,y=450)
+    sframe2.place(x=17,y=350)
 
-    sbtn1 = Button(sframe2, width=25, height=4, command=destroy)
-    sbtn1.config(text='취소')
+    sbtn1 = Button(sframe2, width=25, height=4, command=updateData)
+    sbtn1.config(text='추가')
     sbtn1.place(x=0,y=0)
 
     sframe3 = Frame(search,highlightbackground='black',highlightthickness=1)
     sframe3.config(width=265,height=80)
-    sframe3.place(x=460,y=450)
+    sframe3.place(x=17,y=450)
 
-    sbtn2 = Button(sframe3, width=25, height=4 ) # command = 
-    sbtn2.config(text='추가')
+    sbtn2 = Button(sframe3, width=25, height=4, command=destroy)
+    sbtn2.config(text='취소')
     sbtn2.place(x=0,y=0)
 
 def open_payment():
@@ -165,16 +206,16 @@ def open_payment():
     pframe2.config(width=265,height=80)
     pframe2.place(x=17,y=350)
 
-    pbtn1 = Button(pframe2, width=25, height=4, command=destroy)
-    pbtn1.config(text='취소')
+    pbtn1 = Button(pframe2, width=25, height=4, command=kakaoApi)
+    pbtn1.config(text='결제')
     pbtn1.place(x=0,y=0)
 
     pframe3 = Frame(payment,highlightbackground='black',highlightthickness=1)
     pframe3.config(width=265,height=80)
     pframe3.place(x=17,y=450)
 
-    sbtn2 = Button(pframe3, width=25, height=4, command=kakaoApi)
-    sbtn2.config(text='결제')
+    sbtn2 = Button(pframe3, width=25, height=4, command=destroy)
+    sbtn2.config(text='취소')
     sbtn2.place(x=0,y=0)
 
 ''' tkinter '''

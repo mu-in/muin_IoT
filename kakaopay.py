@@ -21,8 +21,9 @@ def postServer(data,total):
         'totalPrice': total,
     }
     
-    res = requests.post(server, headers={'Content-type':'application/json'}, params=param)
-    
+    res = requests.post(server, json=param)
+
+    print(param)
     print(res.json())
 
 def payment(data,quantity,total):
@@ -58,5 +59,5 @@ def payment(data,quantity,total):
     return redirect['next_redirect_pc_url']
 
 if __name__== '__main__':
-    redirect = payment(dummy.data,1,100)
+    redirect = payment(dummy.data,16,16000)
     print(redirect)
