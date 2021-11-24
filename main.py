@@ -1,24 +1,23 @@
-from tkinter import *
 import tkinter.ttk as ttk
-from typing import List
 import numpy as np
 import pandas as pd
-from PIL import Image, ImageTk
 import cv2
-from functools import partial
-
+import requests 
 import kakaopay
 import similar
-
-import dummy #dummy data
+import requests
+from tkinter import *
+from functools import partial
+from PIL import Image, ImageTk
 
 ''' init '''
 cam = cv2.VideoCapture(0)
-
 data = []
 quantity = 0
 amount = 0
 similarList = pd.DataFrame()
+url = "https://347c-203-250-148-130.ngrok.io/predict"
+database = pd.read_csv('products.csv')
 
 ''' func '''
 def init():
@@ -35,13 +34,18 @@ def init():
     picture.configure(image=imgtk)
     btn1.config(text='촬영')
 
+def sendData(url): 
+    files = {'file':open('captured_img.png', 'rb') } 
+    res = requests.post(url,files=files) 
+    return res.json()
+
 def updateList(data):
     global quantity, amount
-
-    table.delete(*table.get_children()) # init list
-
     total_quantity = 0
     total_amount = 0
+
+    table.delete(*table.get_children())
+
     for i in range(0,len(data)):
         table.insert("",'end',text=f"no.{i}",
             values=(
@@ -68,21 +72,56 @@ def updateList(data):
 
 def onCapture():
     global data
+    
+    init()
+    ret,img = cam.read()
+    if ret == False:
+        print("Camera is Not Ready!")
+        exit()
+    
+    # test
+    # img = cv2.imread('test.jpeg',cv2.IMREAD_COLOR)
 
-    cvt_img = cv2.cvtColor(cam.read()[1],cv2.COLOR_BGR2RGB)
-    cvt_size = cv2.resize(cvt_img,dsize=(240,140),interpolation=cv2.INTER_AREA)
-    
-    img = Image.fromarray(cvt_size) # 모델에 이시키 가져가면 될듯?
-    imgtk = ImageTk.PhotoImage(image=img)
-    
-    data = dummy.data # 상품 리스트 결과값 여기다가 박아주면 될듯
+    cv2.imwrite('captured_img.png',img)
+
+    resize_img = cv2.resize(img,dsize=(240,140),interpolation=cv2.INTER_AREA)
+    cvt_img = cv2.cvtColor(resize_img,cv2.COLOR_BGR2RGB)
+
+    GUI_img = Image.fromarray(cvt_img)
+    imgtk = ImageTk.PhotoImage(image=GUI_img)
+
+    response = sendData(url)
+
+    detected_data = list()
+    status = dict()
+
+    # 갯수 파악 
+    for item in response['output']:
+        key = list(item.keys())[0]
+        if key in status.keys():
+            status[key] += 1
+        else : status[key] = 1
+
+    # 데이터 정리
+    for key in status.keys():
+        info = database[database['class']==int(key)]
+        item = {
+            "id" : info['data_id'].item(),
+            "category" : info['category_large'].item(),
+            "name" : info['name'].item(),
+            "price" : info['price'].item(), 
+            "quantity" : status[key]
+        }
+        detected_data.append(item)
 
     # tkinter update
     picture.imgtk = imgtk
     picture.configure(image=imgtk)
     btn1.config(text='재촬영')
+    
+    data = detected_data
 
-    updateList(data)
+    updateList(detected_data)
 
 def plusCount(i):
     global data
@@ -218,136 +257,138 @@ def open_payment():
     sbtn2.config(text='취소')
     sbtn2.place(x=0,y=0)
 
-''' tkinter '''
-tk = Tk()
-tk.title('muin')
-tk.geometry('965x650+30+30') # 가로 x 세로 + x좌표 + y좌표
-tk.resizable(False,False) # 크기 변경 불가
+if __name__ == '__main__':
 
-# cam
-frame1 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame1.config(width=265,height=165)
-frame1.place(x=50,y=50)
+    ''' tkinter '''
+    tk = Tk()
+    tk.title('muin')
+    tk.geometry('965x650+30+30') # 가로 x 세로 + x좌표 + y좌표
+    tk.resizable(False,False) # 크기 변경 불가
 
-picture = Label(tk)
-picture.grid(row=10,columns=10)
-picture.place(x=60,y=60)
+    # cam
+    frame1 = Frame(tk,highlightbackground='black',highlightthickness=1)
+    frame1.config(width=265,height=165)
+    frame1.place(x=50,y=50)
 
-# notice
-frame2 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame2.config(width=265,height=260)
-frame2.place(x=50,y=250)
+    picture = Label(tk)
+    picture.grid(row=10,columns=10)
+    picture.place(x=60,y=60)
 
-text = Label(frame2)
-text.config(text='[ 사용방법 ]')
-text.place(x=10,y=10)
+    # notice
+    frame2 = Frame(tk,highlightbackground='black',highlightthickness=1)
+    frame2.config(width=265,height=260)
+    frame2.place(x=50,y=250)
 
-text = Label(frame2)
-text.config(text='1. 상품을 계산대 위에 올립니다.\n2. 촬영 버튼을 누릅니다.\n3.상품 리스트 확인 후 결제 버튼을 누릅니다.')
-text.place(x=10,y=40)
+    text = Label(frame2)
+    text.config(text='[ 사용방법 ]')
+    text.place(x=10,y=10)
 
-text = Label(frame2)
-text.config(text='[ 주의사항 ]')
-text.place(x=10,y=120)
+    text = Label(frame2)
+    text.config(text='1. 상품을 계산대 위에 올립니다.\n2. 촬영 버튼을 누릅니다.\n3.상품 리스트 확인 후 결제 버튼을 누릅니다.')
+    text.place(x=10,y=40)
 
-text = Label(frame2)
-text.config(text='1. 물품을 겹치면 인식이 안됩니다.\n2. 인식 오류 시 재촬영을 누르세요.\n3. 상품 검색버튼으로 추가할 수 있습니다.')
-text.place(x=10,y=150)
+    text = Label(frame2)
+    text.config(text='[ 주의사항 ]')
+    text.place(x=10,y=120)
 
-# list
-frame3 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame3.config(width=565,height=350)
-frame3.place(x=350,y=50)
+    text = Label(frame2)
+    text.config(text='1. 물품을 겹치면 인식이 안됩니다.\n2. 인식 오류 시 재촬영을 누르세요.\n3. 상품 검색버튼으로 추가할 수 있습니다.')
+    text.place(x=10,y=150)
 
-table = ttk.Treeview(frame3,selectmode='browse')
-table.config(height=8)
-table.pack(side='left')
+    # list
+    frame3 = Frame(tk,highlightbackground='black',highlightthickness=1)
+    frame3.config(width=565,height=350)
+    frame3.place(x=350,y=50)
 
-style = ttk.Style()
-style.configure('Treeview', rowheight=40)
+    table = ttk.Treeview(frame3,selectmode='browse')
+    table.config(height=8)
+    table.pack(side='left')
 
-scrollbar = ttk.Scrollbar(frame3,orient='vertical',command=table.yview)
-scrollbar.pack(side='right',fill='y')
+    style = ttk.Style()
+    style.configure('Treeview', rowheight=40)
 
-table.configure(yscrollcommand=scrollbar.set)
+    scrollbar = ttk.Scrollbar(frame3,orient='vertical',command=table.yview)
+    scrollbar.pack(side='right',fill='y')
 
-table['columns'] = ("1","2","3","4","5","6",)
-table['show']='headings'
-table.column("1",width=40,anchor='c')
-table.column("2",width=90,anchor='c')
-table.column("3",width=140,anchor='c')
-table.column("4",width=60,anchor='c')
-table.column("5",width=120,anchor='c')
-table.column("6",width=100,anchor='c')
-table.heading("1",text='No.')
-table.heading("2",text='대분류')
-table.heading("3",text='상품명')
-table.heading("4",text='단가')
-table.heading("5",text='수량')
-table.heading("6",text='총 금액')
+    table.configure(yscrollcommand=scrollbar.set)
 
-# init plus, minus btn - max 20
-plus = []
-minus = []
+    table['columns'] = ("1","2","3","4","5","6",)
+    table['show']='headings'
+    table.column("1",width=40,anchor='c')
+    table.column("2",width=90,anchor='c')
+    table.column("3",width=140,anchor='c')
+    table.column("4",width=60,anchor='c')
+    table.column("5",width=120,anchor='c')
+    table.column("6",width=100,anchor='c')
+    table.heading("1",text='No.')
+    table.heading("2",text='대분류')
+    table.heading("3",text='상품명')
+    table.heading("4",text='단가')
+    table.heading("5",text='수량')
+    table.heading("6",text='총 금액')
 
-for i in range(20):
-    plus.append(Button(table, width=1, height=1))
-    minus.append(Button(table, width=1, height=1))
+    # init plus, minus btn - max 20
+    plus = []
+    minus = []
 
-for i in range(20):
-    plus[i].config(text='+',command=partial(plusCount,i))
-    minus[i].config(text='-',command=partial(minusCount,i))
+    for i in range(20):
+        plus.append(Button(table, width=1, height=1))
+        minus.append(Button(table, width=1, height=1))
 
-# result
-frame4 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame4.config(width=565,height=80)
-frame4.place(x=350,y=430)
+    for i in range(20):
+        plus[i].config(text='+',command=partial(plusCount,i))
+        minus[i].config(text='-',command=partial(minusCount,i))
 
-text = Label(frame4)
-text.config(text='총 수량',font=('',15),foreground='#5E5E5E')
-text.place(x=20,y=25)
+    # result
+    frame4 = Frame(tk,highlightbackground='black',highlightthickness=1)
+    frame4.config(width=565,height=80)
+    frame4.place(x=350,y=430)
 
-text = Label(frame4)
-text.config(text='개',font=('',15),foreground='#5E5E5E')
-text.place(x=140,y=25)
+    text = Label(frame4)
+    text.config(text='총 수량',font=('',15),foreground='#5E5E5E')
+    text.place(x=20,y=25)
 
-count = Label(frame4)
-count.config(text='0',font=('',25),foreground='#0076BA')
-count.place(x=100,y=18)
+    text = Label(frame4)
+    text.config(text='개',font=('',15),foreground='#5E5E5E')
+    text.place(x=140,y=25)
 
-total = Label(frame4)
-total.config(text='0',font=('',25),foreground='#0076BA')
-total.place(x=380,y=18)
+    count = Label(frame4)
+    count.config(text='0',font=('',25),foreground='#0076BA')
+    count.place(x=100,y=18)
 
-text = Label(frame4)
-text.config(text='원',font=('',15),foreground='#5E5E5E')
-text.place(x=500,y=25)
+    total = Label(frame4)
+    total.config(text='0',font=('',25),foreground='#0076BA')
+    total.place(x=380,y=18)
 
-# capture btn
-frame5 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame5.config(width=265,height=80)
-frame5.place(x=50,y=530)
+    text = Label(frame4)
+    text.config(text='원',font=('',15),foreground='#5E5E5E')
+    text.place(x=500,y=25)
 
-btn1 = Button(frame5, width=25, height=4, command=onCapture)
-btn1.config(text='촬영')
-btn1.place(x=0,y=0)
+    # capture btn
+    frame5 = Frame(tk,highlightbackground='black',highlightthickness=1)
+    frame5.config(width=265,height=80)
+    frame5.place(x=50,y=530)
 
-# search btn
-frame6 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame6.config(width=265,height=80)
-frame6.place(x=350,y=530)
+    btn1 = Button(frame5, width=25, height=4, command=onCapture)
+    btn1.config(text='촬영')
+    btn1.place(x=0,y=0)
 
-btn2 = Button(frame6, width=25, height=4, command=open_search)
-btn2.config(text='상품 검색')
-btn2.place(x=0,y=0)
+    # search btn
+    frame6 = Frame(tk,highlightbackground='black',highlightthickness=1)
+    frame6.config(width=265,height=80)
+    frame6.place(x=350,y=530)
 
-# pay btn
-frame7 = Frame(tk,highlightbackground='black',highlightthickness=1)
-frame7.config(width=265,height=80)
-frame7.place(x=650,y=530)
+    btn2 = Button(frame6, width=25, height=4, command=open_search)
+    btn2.config(text='상품 검색')
+    btn2.place(x=0,y=0)
 
-btn2 = Button(frame7, width=25, height=4, command=open_payment)
-btn2.config(text='결제')
-btn2.place(x=0,y=0)
+    # pay btn
+    frame7 = Frame(tk,highlightbackground='black',highlightthickness=1)
+    frame7.config(width=265,height=80)
+    frame7.place(x=650,y=530)
 
-tk.mainloop()
+    btn2 = Button(frame7, width=25, height=4, command=open_payment)
+    btn2.config(text='결제')
+    btn2.place(x=0,y=0)
+
+    tk.mainloop()

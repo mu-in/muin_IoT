@@ -3,9 +3,9 @@ import webbrowser
 import time
 import os
 
-import dummy
+import key
 
-ADMIN_KEY = '4f548583e4f51f456c8c69821f4b24b5'
+ADMIN_KEY = key.ADMIN_KEY
 
 server = "https://mu-in.herokuapp.com/payment"
 kakao = "https://kapi.kakao.com/v1/payment/ready"
@@ -23,7 +23,6 @@ def postServer(data,total):
     
     res = requests.post(server, json=param)
 
-    print(param)
     print(res.json())
 
 def payment(data,quantity,total):
@@ -50,7 +49,7 @@ def payment(data,quantity,total):
 
     webbrowser.open(url=redirect['next_redirect_pc_url'])
     
-    time.sleep(10) # 10초 기다리고 닫기
+    time.sleep(15) # 15초 기다리고 닫기
     os.system("killall -9 'Safari'") # mac
     # os.system("taskkill /im chrome.exe /f") # window
 
@@ -59,5 +58,6 @@ def payment(data,quantity,total):
     return redirect['next_redirect_pc_url']
 
 if __name__== '__main__':
-    redirect = payment(dummy.data,16,16000)
-    print(redirect)
+    #redirect = payment({},16,16000)
+    #print(redirect)
+    print('hi')
