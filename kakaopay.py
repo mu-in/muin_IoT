@@ -58,4 +58,4 @@ def payment(data,quantity,total):
     return redirect['next_redirect_pc_url']
 
 if __name__== '__main__':
-    redirect = payment([{'id':1,'category':'test','name':'test','price':1000,'quentity':3}],3,3000)
+    redirect = payment([{'id':1,'category':'test','name':'test','price':1000,'quantity':3}],3,3000)
