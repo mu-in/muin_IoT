@@ -3,7 +3,7 @@ import webbrowser
 import time
 import os
 
-import key
+from module import key
 
 ADMIN_KEY = key.ADMIN_KEY
 

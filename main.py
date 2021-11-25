@@ -3,12 +3,13 @@ import numpy as np
 import pandas as pd
 import cv2
 import requests 
-import kakaopay
-import similar
 import requests
 from tkinter import *
 from functools import partial
 from PIL import Image, ImageTk
+
+from module import similar
+from module import kakaopay
 
 ''' init '''
 cam = cv2.VideoCapture(0)
@@ -17,7 +18,7 @@ quantity = 0
 amount = 0
 similarList = pd.DataFrame()
 url = "https://347c-203-250-148-130.ngrok.io/predict"
-database = pd.read_csv('products.csv')
+database = pd.read_csv('./data/products.csv')
 
 ''' func '''
 def init():
@@ -35,7 +36,7 @@ def init():
     btn1.config(text='촬영')
 
 def sendData(url): 
-    files = {'file':open('captured_img.png', 'rb') } 
+    files = {'file':open('./data/captured_img.png', 'rb') } 
     res = requests.post(url,files=files) 
     return res.json()
 
@@ -80,9 +81,9 @@ def onCapture():
         exit()
     
     # test
-    # img = cv2.imread('test.jpeg',cv2.IMREAD_COLOR)
+    img = cv2.imread('./data/test.jpeg',cv2.IMREAD_COLOR)
 
-    cv2.imwrite('captured_img.png',img)
+    cv2.imwrite('./data/captured_img.png',img)
 
     resize_img = cv2.resize(img,dsize=(240,140),interpolation=cv2.INTER_AREA)
     cvt_img = cv2.cvtColor(resize_img,cv2.COLOR_BGR2RGB)
