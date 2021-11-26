@@ -209,7 +209,7 @@ def openSearch():
 
     sscrollbar['command']=slistbox.yview
 
-    sbtn1 = Button(search, width=25, height=4, command=updateData, highlightbackground='#f2f2f2',highlightthickness=0, font=gothic20b, bg='#FA6D6E',fg='#ffffff')
+    sbtn1 = Button(search, width=25, height=4, command=updateData, highlightbackground='#f2f2f2',highlightthickness=0, font=gothic20b, bg='#FA6D6E',fg='#FA6D6E')#,fg='#ffffff')
     sbtn1.config(text='추가')
     sbtn1.place(x=17,y=350, width=265,height=80)
 
@@ -247,7 +247,7 @@ def openPayment():
     text.config(text=f"{amount} 원")
     text.place(x=95,y=200)
 
-    pbtn1 = Button(payment, width=25, height=4, command=kakaoApi, highlightbackground='#f2f2f2',highlightthickness=0,font=gothic20b,bg='#FA6D6E',fg='#ffffff')
+    pbtn1 = Button(payment, width=25, height=4, command=kakaoApi, highlightbackground='#f2f2f2',highlightthickness=0,font=gothic20b,bg='#FA6D6E',fg='#FA6D6E')#,fg='#ffffff')
     pbtn1.config(text='결제')
     pbtn1.place(x=17,y=350,width=265,height=80)
 
@@ -350,8 +350,8 @@ if __name__ == '__main__':
         if i%2==0: bgColor = '#f2f2f2'
         else : bgColor = '#ffffff'
 
-        plus[i].config(text='+',command=partial(plusCount,i),highlightbackground=bgColor,font=gothic15b,bg='#FA6D6E',fg='#ffffff')
-        minus[i].config(text='-',command=partial(minusCount,i),highlightbackground=bgColor,font=gothic15b,bg='#0076BA',fg='#ffffff')
+        plus[i].config(text='+',command=partial(plusCount,i),highlightbackground=bgColor,font=gothic15b,bg='#FA6D6E',fg='#FA6D6E')
+        minus[i].config(text='-',command=partial(minusCount,i),highlightbackground=bgColor,font=gothic15b,bg='#0076BA',fg='#0076BA')
 
     # result
     frame4 = Frame(tk,highlightbackground='#A4AEBA',highlightthickness=1)
@@ -385,7 +385,7 @@ if __name__ == '__main__':
     text.place(x=500,y=25)
 
     # capture btn
-    btn1 = Button(tk, highlightbackground='#C5D1D9',command=onCapture, font=gothic20b, bg='#FA6D6E',fg='#ffffff')
+    btn1 = Button(tk, highlightbackground='#C5D1D9',command=onCapture, font=gothic20b, bg='#FA6D6E',fg='#FA6D6E')#,fg='#ffffff')
     btn1.config(text='촬영')
     btn1.place(x=50,y=530, width=265, height=80)
 
