@@ -8,6 +8,8 @@ cap = cv2.VideoCapture(0)
 block = np.zeros((384,384,3),np.uint8)
 
 qr = ''
+cnt = 0
+
 while True:
     success, frame = cap.read()
 
@@ -17,13 +19,21 @@ while True:
                 qr = code.data.decode("utf-8")
                 res = requests.get(f'https://mu-in.herokuapp.com/user/qrcode?seed={qr}')
                 print(res.json())
-                if(res.json()['validation']==True):
-                    cv2.putText(block,'입장하세요',150,150,cv2.FONT_HERSHEY_SIMPLEX,1,(33, 147, 58),2)
-                    cv2.imshow('success',block)
-                    time.sleep(5)
-                    cv2.destroyWindow('success')
-                
-        cv2.imshow('cam',frame)
+
+                try:
+                    if(res.json()['validation']==True):
+                        cnt=30
+        
+                except:
+                    pass
+        
+        if cnt==0:
+            cv2.putText(frame,'show your QR',(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_AA)
+            cv2.imshow('cam',frame)
+        else:
+            cv2.putText(frame,'success!!',(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2,cv2.LINE_AA)
+            cv2.imshow('cam',frame)
+            cnt-=1
 
         key = cv2.waitKey(1)
         
