@@ -4,11 +4,15 @@ import time
 import requests
 import numpy as np
 
+from module import key
+
 cap = cv2.VideoCapture(0)
 block = np.zeros((384,384,3),np.uint8)
 
 qr = ''
 cnt = 0
+
+server = key.SERVER_URL
 
 while True:
     success, frame = cap.read()
@@ -17,7 +21,7 @@ while True:
         for code in zbar.decode(frame):
             if qr != code.data.decode("utf-8"):
                 qr = code.data.decode("utf-8")
-                res = requests.get(f'https://mu-in.herokuapp.com/user/qrcode?seed={qr}')
+                res = requests.get(f'{server}/user/qrcode?seed={qr}')
                 print(res.json())
 
                 try:

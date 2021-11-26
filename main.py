@@ -12,6 +12,7 @@ import requests
 
 from module import similar
 from module import kakaopay
+from module import key
 from data import dummy
 
 ''' init '''
@@ -23,8 +24,7 @@ similarList = pd.DataFrame()
 
 database = pd.read_csv('./data/products.csv')
 
-url = "https://a172-203-250-148-130.ngrok.io"
-url = url+'/predict'
+url = key.MODEL_URL + '/predict'
 
 ''' func '''
 def init():

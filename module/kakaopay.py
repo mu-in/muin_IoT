@@ -7,8 +7,8 @@ from module import key
 
 ADMIN_KEY = key.ADMIN_KEY
 
-server = "https://mu-in.herokuapp.com/payment"
-kakao = "https://kapi.kakao.com/v1/payment/ready"
+server = key.SERVER_URL+'/payment'
+kakao = key.KAKAO_URL
 
 def postServer(data,total):
     products = []
