@@ -7,6 +7,7 @@ from functools import partial
 import numpy as np
 import pandas as pd
 import cv2
+import base64
 
 import requests
 
@@ -24,7 +25,7 @@ similarList = pd.DataFrame()
 
 database = pd.read_csv('./data/products.csv')
 
-url = key.MODEL_URL + '/predict'
+url = key.MODEL_URL  + '/predict'
 
 ''' func '''
 def init():
@@ -95,17 +96,18 @@ def onCapture():
         exit()
     
     # test
-    img = cv2.imread('./data/test.jpeg',cv2.IMREAD_COLOR)
-
     cv2.imwrite('./data/captured_img.png',img)
+
+    response = sendData(url)
+    data = base64.b64decode(response['img'])
+    jpg_arr = np.frombuffer(data, dtype=np.uint8)
+    img = cv2.imdecode(jpg_arr, cv2.IMREAD_COLOR)
 
     resize_img = cv2.resize(img,dsize=(240,140),interpolation=cv2.INTER_AREA)
     cvt_img = cv2.cvtColor(resize_img,cv2.COLOR_BGR2RGB)
 
     GUI_img = Image.fromarray(cvt_img)
     imgtk = ImageTk.PhotoImage(image=GUI_img)
-
-    response = sendData(url)
     
     #detected_data = dummy.data
     detected_data = list()
